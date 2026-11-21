@@ -33,7 +33,7 @@ export const WatchlistScreen = ({route, navigation}) => {
                 setIsLoading(false);
             }
         }
-    }, [route.params?.addedMovie]); //effect runs again if addedMovie changes
+    }, [route.params?.addedMovie]); //safe guard, effect runs again if addedMovie changes
 
     //Receives validated newPlan from PlannerScreen, keeps new movie plans alive without cloud database
     useEffect(() => {
@@ -41,7 +41,7 @@ export const WatchlistScreen = ({route, navigation}) => {
         if(route.params?.newPlan){
             try{
                 setIsLoading(true);
-                setError('');
+                setError(''); //clear prev error
                 const incomingPlan = route.params.newPlan; //store plan obj
 
                 //Check for duplication before adding newPlan
@@ -55,6 +55,33 @@ export const WatchlistScreen = ({route, navigation}) => {
                 setIsLoading(false);
             }
         }
-    })
+    }, [route.params?.newPlan]) //safe guard, effect runs again if newPlan changes
 
+    //Remove movie from watchlist with confirmation alert
+    const confirmRemove = (movieID, movieTitle) => {
+        //Confirmation alert msg and btn
+        Alert.alert(
+            'Remove Movie',
+            `Remove "${movieTitle}" from your watchlist?`,
+            [
+                {text: 'Cancel', style:'cancel'}, //Abort removal action
+                {
+                    text: 'Remove',
+                    onPress: () => {
+                        //Update watchlist state
+                        try{
+                            setError('');
+                            setWatchlist((prev) => prev.filter((item) => item.id !== movieID)) //Create new array without removed item
+                        } catch(error){
+                            Alert.alert('Error', 'Unable to remove movie from watchlist.')
+                        }
+                    },   
+                },
+            ]
+        );
+    };
+
+    return(
+        
+    )
 }
