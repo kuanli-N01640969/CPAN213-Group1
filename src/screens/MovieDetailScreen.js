@@ -77,4 +77,40 @@ export const MovieDetailScreen = ({route, navigation}) => {
             Alert.alert('Error','Unable to add theater to list, please try again.')
        } 
     };
+
+    return(
+        <SafeAreaView>
+            <ScrollView>
+                {/*Conditional rendering loading, error, empty, success states */}
+                {isLoading ? (
+                    <View>
+                        <ActivityIndicator size="large"/>
+                        <Text>Loading movie details...</Text>
+                    </View>
+                ) : (
+                    <View>
+                        {error !=='' && (
+                            <View>
+                                <Text>Error: {error}</Text>
+                                <Button title='Dismiss error' onPress={() => setError('')}/>
+                            </View>
+                        )}
+                    </View>
+
+                    //Empty and success movie data
+                    {!movie ? (
+                        <Text>No movie selected. Return to Home and select a movie to view details.</Text>       
+                    ) : (
+                        <View>
+                            <Text>{movie.title}</Text>
+                            <Text>Release Date: {movie.release_date || 'N/A'}</Text>
+                            <Text>Synopsis:</Text>
+                            <Text>{movie.overview || 'No synopsis available'}</Text>
+                        </View>
+                    )}
+
+                )}
+            </ScrollView>
+        </SafeAreaView>
+    )
 }
