@@ -139,11 +139,17 @@ export const MovieDetailScreen = ({route, navigation}) => {
                             />
                             <Button title='Add Theater' onPress={handleAddTheater}/>
                         </View>
+
+                        {/*Page navigation buttons*/}        
+                        <View>
+                            <Button title='Go to Home' onPress={() => navigation.navigate('Home')}/>
+                            <Button title='Go to Watchlist' onPress={() => navigation.navigate('Watchlist')}/>
+                            <Button title='Go to Planner' onPress={() => navigation.navigate('Planner')}/>
+                            <Button title='Go back' onPress={() => navigation.goBack()}/>
+                        </View>
                     </View>
-
-
                 )}
             </ScrollView>
         </SafeAreaView>
-    )
-}
+    );
+};
