@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, Pressable, ActivityIndicator, Alert, } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 
@@ -131,7 +131,7 @@ export const HomeScreen = ({navigation}) => {
                         ListEmptyComponent={
                             <Text>No movies availble. Search for a title or load a category.</Text>
                         }
-                        renderItem={({item}) = > (
+                        renderItem={({item}) => (
                             <Pressable onPress={() => onMoviePressed(item)}>
                                 <View>
                                     <Text>{item.title}</Text>
