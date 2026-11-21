@@ -1,20 +1,56 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Button, StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { HomeScreen } from './src/screens/HomeScreen';
+import { MovieDetailScreen } from './src/screens/MovieDetailScreen';
+import { WatchlistScreen } from './src/screens/WatchlistScreen';
+import { PlannerScreen } from './src/screens/PlannerScreen';
+
+//Stack enables screen navigation
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  //Global header configuration
+  const sharedHeaderOptions = {
+    headerStyle: { backgroundColor: '#1e293b'},
+    headerTintColor: '#ffffff',
+    headerTitleAlign: 'center',
+    headerTitleStyle: { fontWeight: 'bold'},
+  }
+    
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          {/*App starting page*/}
+          <Stack.Navigator initialRouteName='Home'>
+            <Stack.Group screenOptions={sharedHeaderOptions}>
+              <Stack.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{title: 'Cinema Geek'}}
+              />
+              <Stack.Screen
+                name="MovieDetail"
+                component={MovieDetailScreen}
+                options={{title: 'Movie Details'}}
+              />
+              <Stack.Screen
+                name="Watchlist"
+                component={WatchlistScreen}
+                options={{title: 'My Watchlist'}}
+              />
+              <Stack.Screen
+                name="Planner"
+                component={PlannerScreen}
+                options={{title: 'Marathon Planner'}}
+              />
+            </Stack.Group>
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
