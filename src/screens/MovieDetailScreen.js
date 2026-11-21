@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, Button, Pressable, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TextInput, Button, Pressable, ActivityIndicator, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+// Abeer added this here - Import fetchMovieDetails to load runtime, genres, and theatrical status
+import { fetchMovieDetails } from '../services/tmdbAPI';
+// ended here
 
 import movieDetailStyles from '../styling/movieDetailStyles';
 
 export const MovieDetailScreen = ({route, navigation}) => {
     //Retrieve movie obj passed from home screen
-    const movie = route.params?.movie || null;
+    // Abeer added this here - Store passed movie in state so it can be enriched with /movie/{id} details
+    const initialMovie = route.params?.movie || null;
+    const [movie, setMovie] = useState(initialMovie);
+    // ended here
 
     //Local theater input state
     const [theaterName, setTheaterName] = useState('');
@@ -15,10 +21,46 @@ export const MovieDetailScreen = ({route, navigation}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
+    // Abeer added this here - Fetch full movie metadata (/movie/{movie_id}) when screen opens
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadFullDetails = async () => {
+            if (!initialMovie?.id) {
+                setMovie(null);
+                return;
+            }
+
+            try {
+                setIsLoading(true);
+                setError('');
+                const detailedMovie = await fetchMovieDetails(initialMovie.id);
+                if (isMounted) {
+                    setMovie(detailedMovie);
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError(err.message || 'Unable to load full movie details.');
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        loadFullDetails();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [initialMovie]);
+    // ended here
+
     //=====================================
-    //M2 TODO: Connect to redux & firestore 
+    //M2 TODO: Connect to redux & firestore
     //=====================================
-    //Pass movie to Watchlist Screen 
+    //Pass movie to Watchlist Screen
     const handleAddToWatchlist = () => {
         try{
             setIsLoading(true);
@@ -36,12 +78,12 @@ export const MovieDetailScreen = ({route, navigation}) => {
                     onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}), //move to watchlist screen
                 },
                 {text: 'Back to movie detail'}, //remain in movie detail screen 
-            ]    
+            ]
             )
         } catch(error){
             Alert.alert('Error', 'Could not add movie to your watchlist');
         } finally{
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -53,16 +95,16 @@ export const MovieDetailScreen = ({route, navigation}) => {
             
             //Blank entry
             if(trimmedTheater === ''){
-                Alert.alert('Invalid Input','Please enter a theater name.')
-            }
+                Alert.alert('Invalid Input','Please enter a theater name.');
             return;
+            }
 
             //Data format validation
-            const theaterFormat = /^[a-zA-Z0-9\s'-]$/;
+            const theaterFormat = /^[a-zA-Z0-9\s'-]+$/;
             if(!theaterFormat.test(trimmedTheater)){
                 Alert.alert('Invalid Format', 'Theater name must be letters or numbers.')
-            };
             return;
+            }
 
             //Duplication check
             const alreadyExists = localTheaters.some((theater) => t.toLowerCase === trimmedTheater.toLowerCase());
@@ -119,6 +161,14 @@ export const MovieDetailScreen = ({route, navigation}) => {
                     ) : (
                             
                             <View style={movieDetailStyles.movieContainer}>
+                                {/* Abeer added this here - Render movie poster image from normalized TMDB posterUrl */}
+                                {movie.posterUrl ? (
+                                    <Image
+                                        source={{ uri: movie.posterUrl }}
+                                        style={{ width: 160, height: 240, marginBottom: 12 }}
+                                    />
+                                ) : null}
+                                {/* ended here */}
 
                                 <Text style={movieDetailStyles.movieTitle}>
                                     {movie.title}
@@ -127,6 +177,13 @@ export const MovieDetailScreen = ({route, navigation}) => {
                                 <Text style={movieDetailStyles.releaseDate}>
                                     Release Date: {movie.release_date || 'N/A'}
                                 </Text>
+                                {/* Abeer added this here - Display runtime, theatrical status, and genres from /movie/{id} */}
+                                <Text>Runtime: {movie.runtime ? `${movie.runtime} mins` : 'N/A'}</Text>
+                                <Text>Status: {movie.status || 'N/A'}</Text>
+                                {movie.genres && movie.genres.length > 0 && (
+                                    <Text>Genres: {movie.genres.join(', ')}</Text>
+                                )}
+                                {/* ended here */}
 
                                 <Text style={movieDetailStyles.sectionHeading}>
                                     Synopsis:
