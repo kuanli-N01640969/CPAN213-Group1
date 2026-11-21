@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
+// Abeer added this here - Import TMDB API service functions for category feeds and title search
+import { useEffect, useCallback, Image } from 'react-native';
+import { fetchMoviesByCategory, searchMovies } from '../services/tmdbAPI';
+// ended here
 
 export const HomeScreen = ({navigation}) => {
     //Local state for form and filter
@@ -16,7 +20,27 @@ export const HomeScreen = ({navigation}) => {
     // API
     //=========
 
-    //Search input validation 
+    // Abeer added this here - Fetch live movies by category (/movie/now_playing, /upcoming, /popular) on mount and Picker change
+    const loadCategoryMovies = useCallback(async (selectedCategory) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const { movies: fetchedMovies } = await fetchMoviesByCategory(selectedCategory);
+            setMovies(fetchedMovies);
+        } catch (err) {
+            setError(err.message || 'Unable to load movies from TMDB.');
+            setMovies([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadCategoryMovies(category);
+    }, [category, loadCategoryMovies]);
+    // ended here
+
+    //Search input validation
     const handleSearch = async() => {
         try{
             const trimmedQuery = searchQuery.trim(); //remove white spaces
@@ -35,9 +59,17 @@ export const HomeScreen = ({navigation}) => {
 
             //Start loading and clear previous error
             setIsLoading(true);
-            setError('');
+            setError(null);
+
+            // Abeer added this here - Execute live TMDB /search/movie request and update FlatList data
+            const { movies: searchResults } = await searchMovies(trimmedQuery);
+            setMovies(searchResults);
+            // ended here
         } catch (error){
-             Alert.alert('Search Error', 'Unable to retrieve movie, please try again.')
+            // Abeer added this here - Surface API error message while keeping existing error alert
+            setError(error.message || 'Unable to retrieve movie, please try again.');
+            // ended here
+            Alert.alert('Search Error', 'Unable to retrieve movie, please try again.')
         } finally{
             setIsLoading(false);
         }
@@ -46,7 +78,10 @@ export const HomeScreen = ({navigation}) => {
     //Clear search and reset error state
     const handleResetSearch = () => {
         setSearchQuery('');
-        setError('');
+        setError(null);
+        // Abeer added this here - Reload active category feed when search is cleared
+        loadCategoryMovies(category);
+        // ended here
     };
 
     //Movie selction handler to detail page
@@ -83,10 +118,12 @@ export const HomeScreen = ({navigation}) => {
                         onChangeText={setSearchQuery}
                         maxLength={60}
                     />
+                    {/* Abeer added this here - Invoke handleSearch on button press so search executes */}
                     <Button
                         title='Search'
-                        onPress={() => {handleSearch}}
+                        onPress={handleSearch}
                     />
+                    {/* ended here */}
                     {/*Check if there's input to reset then render*/}
                     {searchQuery.length > 0 && (
                         <Button title='Clear Search' onPress={handleResetSearch}/>
@@ -100,16 +137,15 @@ export const HomeScreen = ({navigation}) => {
                         selectedValue={category}
                         onValueChange={(itemValue) => {
                             setCategory(itemValue);
-                            setError('');
+                            setError(null);
                         }}
-                        
                         //=============
                         // API endpoint
                         //=============
                     >
-                        <Picker.item label ="Now Playing in Theaters" value="now_playing"/>
-                        <Picker.item label ="Upcoming Releases" value="upcoming"/>
-                        <Picker.item label ="Popular Movies" value="popular"/>    
+                        <Picker.Item label ="Now Playing in Theaters" value="now_playing"/>
+                        <Picker.Item label ="Upcoming Releases" value="upcoming"/>
+                        <Picker.Item label ="Popular Movies" value="popular"/>
                     </Picker>
                 </View>
                 
@@ -119,21 +155,31 @@ export const HomeScreen = ({navigation}) => {
                         <ActivityIndicator size="large"/>
                         <Text>Loading movies...</Text>
                     </View>
-                ) : error !== '' ? (
+                ) : error ? (
                     <View>
                         <Text>Error: {error}</Text>
-                        <Button title='Dismiss error' onPress={() => setError('')}/>
+                        <Button title='Dismiss error' onPress={() => setError(null)}/>
                     </View>
                 ) : (
                     <FlatList
                         data={movies}
-                        keyExtractor={(item) => item.id.tostring()} 
+                        // Abeer added this here - Fix toString() casing so FlatList renders API items
+                        keyExtractor={(item) => item.id.toString()}
+                        // ended here
                         ListEmptyComponent={
                             <Text>No movies availble. Search for a title or load a category.</Text>
                         }
                         renderItem={({item}) => (
                             <Pressable onPress={() => onMoviePressed(item)}>
                                 <View>
+                                    {/* Abeer added this here - Render movie poster from TMDB */}
+                                    {item.posterUrl ? (
+                                        <Image
+                                            source={{ uri: item.posterUrl }}
+                                            style={{ width: 60, height: 90 }}
+                                        />
+                                    ) : null}
+                                    {/* ended here */}
                                     <Text>{item.title}</Text>
                                     <Text>Release: {item.release_date}</Text>
                                 </View>
