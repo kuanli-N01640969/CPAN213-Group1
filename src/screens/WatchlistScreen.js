@@ -33,7 +33,7 @@ export const WatchlistScreen = ({route, navigation}) => {
                 setIsLoading(false);
             }
         }
-    }, [route.params?.addedMovie]); //effect runs again if addedMovie changes
+    }, [route.params?.addedMovie]); //safe guard, effect runs again if addedMovie changes
 
     //Receives validated newPlan from PlannerScreen, keeps new movie plans alive without cloud database
     useEffect(() => {
@@ -41,7 +41,7 @@ export const WatchlistScreen = ({route, navigation}) => {
         if(route.params?.newPlan){
             try{
                 setIsLoading(true);
-                setError('');
+                setError(''); //clear prev error
                 const incomingPlan = route.params.newPlan; //store plan obj
 
                 //Check for duplication before adding newPlan
@@ -55,6 +55,114 @@ export const WatchlistScreen = ({route, navigation}) => {
                 setIsLoading(false);
             }
         }
-    })
+    }, [route.params?.newPlan]) //safe guard, effect runs again if newPlan changes
 
-}
+    //Remove movie from watchlist with confirmation alert
+    const confirmRemove = (movieID, movieTitle) => {
+        //Confirmation alert msg and btn
+        Alert.alert(
+            'Remove Movie',
+            `Remove "${movieTitle}" from your watchlist?`,
+            [
+                {text: 'Cancel', style:'cancel'}, //Abort removal action
+                {
+                    text: 'Remove',
+                    onPress: () => {
+                        //Update watchlist state
+                        try{
+                            setError('');
+                            setWatchlist((prev) => prev.filter((item) => item.id !== movieID)) //Create new array without removed item
+                        } catch(error){
+                            Alert.alert('Error', 'Unable to remove movie from watchlist.')
+                        }
+                    },   
+                },
+            ]
+        );
+    };
+
+    return(
+        <SafeAreaView>
+            <View>
+                <Text>Saved Watchlist ({watchlist.length})</Text>
+
+                {/*Conditional rendering loading, error, empty, success states */}
+                {isLoading ? (
+                    <View>
+                        <ActivityIndicator size="large"/>
+                        <Text>Updating watchlist...</Text>
+                    </View>
+                ) : (
+                    <View>
+                        {error !== '' && (
+                            <View>
+                                <Text>Error: {error}</Text>
+                                <Button title='Dismiss error' onPress={()=> setError('')}/>
+                            </View>
+                        )}
+
+                        {/*Display User Watchlist*/}
+                        <FlatList
+                            data={watchlist}
+                            keyExtractor={(item) => item.id.toString()} //keeps track array and convert id to string
+                            ListEmptyComponent={
+                                <Text>Your watchlist is empty, browse home to add movies.</Text>
+                            } 
+                            //Extracts current movie from flatlist
+                            renderItem={({item}) => (
+                                <Pressable onPress={()=>navigation.navigate('MovieDetail', {movie: item})}> {/*Passing selected movie from detail screen*/}
+                                    <View>
+                                        {/*Movie info*/}
+                                        <Text>{item.title}</Text>
+                                        <Text>Release: {item.release_date || 'N/A'}</Text>
+                                        
+                                        {/*Send selected movie to Planner screen*/}
+                                        <Button
+                                            title='Plan Movie Night'
+                                            onPress={() => navigation.navigate('Planner', {movie: item})}
+                                        />
+
+                                        {/*Remove movie*/}
+                                        <Button
+                                            title='Remove'
+                                            onPress={() => confirmRemove(item.id, item.title)}
+                                        />
+                                    </View>
+                                </Pressable>
+                            )}
+                        />
+                        
+                        {/*Display scheduled movie nights*/}
+                        <View>
+                            <Text>Scheduled Movie Nights ({plannedEvents.length})</Text>
+                            
+                            {plannedEvents.length === 0 ? (
+                                <Text>No movie nights scheduled yet.</Text>
+                            ) : (
+                                //Creates individual UI for each movie plan
+                                plannedEvents.map((plan) => (
+                                    //Display movie plan info 
+                                    <View key={plan.id}>
+                                        <Text>{plan.eventTitle}</Text>
+                                        <Text>
+                                            {plan.date} | {plan.venue} | {plan.attendees} attendee(s)
+                                        </Text>
+                                        {plan.notes !== '' && <Text>Notes: {plan.notes}</Text>}
+                                    </View>
+                                ))
+                            )} 
+                        </View>
+                    </View>   
+                )}
+
+                {/*Page navigation buttons*/}  
+                <View>
+                    <Button title='Go to Home' onPress={() => navigation.navigate('Home')}/>
+                    <Button title='Go to Movie Detail' onPress={() => navigation.navigate('MovieDetail')}/>
+                    <Button title='Go to Planner' onPress={() => navigation.navigate('Planner')}/>
+                    <Button title='Go back' onPress={() => navigation.goBack()}/>
+                </View>    
+            </View>
+        </SafeAreaView>
+    );
+};
