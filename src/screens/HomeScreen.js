@@ -42,4 +42,12 @@ export const HomeScreen = ({navigation}) => {
             setIsLoading(false);
         }
     };
+
+    //Clear search and reset error state
+    const handleResetSearch = () => {
+        setSearchQuery('');
+        setError('');
+    };
+    
+
 }
