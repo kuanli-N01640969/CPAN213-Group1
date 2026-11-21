@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // M2 TODO: Data load from firestore/redux 
 //========================================
 export const WatchlistScreen = ({route, navigation}) => {
-    //List and planner state
+    //Temporary List and planner state until firestore implementation
     const [watchlist, setWatchlist] = useState([]);
     const [plannedEvents, setPlannedEvents] = useState([]);
     //Loading and error states
@@ -34,4 +34,27 @@ export const WatchlistScreen = ({route, navigation}) => {
             }
         }
     }, [route.params?.addedMovie]); //effect runs again if addedMovie changes
+
+    //Receives validated newPlan from PlannerScreen, keeps new movie plans alive without cloud database
+    useEffect(() => {
+        //Check if movie plan was passed
+        if(route.params?.newPlan){
+            try{
+                setIsLoading(true);
+                setError('');
+                const incomingPlan = route.params.newPlan; //store plan obj
+
+                //Check for duplication before adding newPlan
+                setPlannedEvents((prev) => {
+                    const exists = prev.some((plan) => plan.id === incomingPlan.id);
+                    return exists ? prev : [incomingPlan, ...prev]
+                })
+            } catch(error){
+                Alert.alert('','');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    })
+
 }
