@@ -9,7 +9,7 @@ export const HomeScreen = ({navigation}) => {
     const [category, setCategory] = useState('now_playing');
     //Local state for data, loading, and error
     const [movies, setMovies] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
     //=========
@@ -32,8 +32,14 @@ export const HomeScreen = ({navigation}) => {
                 Alert.alert('Invalid data format.', 'Please enter letters or numbers.')
                 return;
             }
+
+            //Start loading and clear previous error
+            setIsLoading(true);
+            setError('');
         } catch (error){
-            
+             Alert.alert('Search Error', 'Unable to retrieve movie, please try again.')
+        } finally{
+            setIsLoading(false);
         }
     };
 }
