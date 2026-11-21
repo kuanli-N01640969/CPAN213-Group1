@@ -11,5 +11,29 @@ export const HomeScreen = ({navigation}) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    
+
+    //=========
+    // API
+    //=========
+
+    //Search input validation 
+    const handleSearch = async() => {
+        try{
+            const trimmedQuery = searchQuery.trim(); //remove empty spaces
+            //Blank entry
+            if (trimmedQuery === ''){
+                Alert.alert('Invalid input', 'Please enter a movie title.')
+                return;
+            }
+
+            //Data format
+            const validTextPattern = /[a-zA-Z0-9]/;
+            if (!validTextPattern.test(trimmedQuery)){
+                Alert.alert('Invalid data format.', 'Please enter letters or numbers.')
+                return;
+            }
+        } catch (error){
+            
+        }
+    };
 }
