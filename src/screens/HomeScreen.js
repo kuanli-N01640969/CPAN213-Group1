@@ -48,6 +48,100 @@ export const HomeScreen = ({navigation}) => {
         setSearchQuery('');
         setError('');
     };
-    
 
-}
+    //Movie selction handler to detail page
+    const onMoviePressed = (selectedMovie) => {
+        navigation.navigate('MovieDetail', {movie: selectedMovie});
+    };
+
+    return(
+        <SafeAreaView>
+            <View>
+                <Text>Discover Movies</Text>
+
+                {/*Navigation options and GoBack*/}
+                <View>
+                    <Button
+                        title='Go to Watchlist'
+                        onPress={() => navigation.navigate('Watchlist')}
+                    />
+                    <Button
+                        title='Go to Planner'
+                        onPress={() => navigation.navigate('Planner')}
+                    />
+                    {/*Check if there's previous page to return then render*/}
+                    {navigation.canGoBack() && (
+                        <Button title='Go Back' onPress={() => navigation.goBack()}/>
+                    )}
+                </View>
+
+                {/*Search bar validation and reset*/}
+                <View>
+                    <TextInput
+                        placeholder='Search by movie title...'
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        maxLength={60}
+                    />
+                    <Button
+                        title='Search'
+                        onPress={() => {handleSearch}}
+                    />
+                    {/*Check if there's input to reset then render*/}
+                    {searchQuery.length > 0 && (
+                        <Button title='Clear Search' onPress={handleResetSearch}/>
+                    )}
+                </View>
+
+                {/*Category dropdown filter*/}
+                <View>
+                    <Text>Browse Category:</Text>
+                    <Picker
+                        selectedValue={category}
+                        onValueChange={(itemValue) => {
+                            setCategory(itemValue);
+                            setError('');
+                        }}
+                        
+                        //=============
+                        // API endpoint
+                        //=============
+                    >
+                        <Picker.item label ="Now Playing in Theaters" value="now_playing"/>
+                        <Picker.item label ="Upcoming Releases" value="upcoming"/>
+                        <Picker.item label ="Popular Movies" value="popular"/>    
+                    </Picker>
+                </View>
+                
+                {/*Conditional rendering for loading, eorror, empty, and success*/}
+                {isLoading ? (
+                    <View>
+                        <ActivityIndicator size="large"/>
+                        <Text>Loading movies...</Text>
+                    </View>
+                ) : error !== '' ? (
+                    <View>
+                        <Text>Error: {error}</Text>
+                        <Button title='Dismiss error' onPress={() => setError('')}/>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={movies}
+                        keyExtractor={(item) => item.id.tostring()} 
+                        ListEmptyComponent={
+                            <Text>No movies availble. Search for a title or load a category.</Text>
+                        }
+                        renderItem={({item}) = > (
+                            <Pressable onPress={() => onMoviePressed(item)}>
+                                <View>
+                                    <Text>{item.title}</Text>
+                                    <Text>Release: {item.release_date}</Text>
+                                </View>
+                            </Pressable>
+                        )}
+                    />
+                )}
+            </View>
+        </SafeAreaView>
+    );
+};
