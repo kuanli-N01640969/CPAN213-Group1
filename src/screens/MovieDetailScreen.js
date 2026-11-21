@@ -31,9 +31,9 @@ export const MovieDetailScreen = ({route, navigation}) => {
             [
                 {
                     text: 'View Watchlist',
-                    onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}),
+                    onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}), //move to watchlist screen
                 },
-                {text: 'Back to movie detail'},
+                {text: 'Back to movie detail'}, //remain in movie detail screen 
             ]    
             )
         } catch(error){
@@ -95,19 +95,52 @@ export const MovieDetailScreen = ({route, navigation}) => {
                                 <Button title='Dismiss error' onPress={() => setError('')}/>
                             </View>
                         )}
+
+                        {/*Empty and success movie data*/}
+                        {!movie ? (
+                            <Text>No movie selected. Return to Home and select a movie to view details.</Text>       
+                        ) : (
+                            <View>
+                                <Text>{movie.title}</Text>
+                                <Text>Release Date: {movie.release_date || 'N/A'}</Text>
+                                <Text>Synopsis:</Text>
+                                <Text>{movie.overview || 'No synopsis available'}</Text>
+                            
+                                {/*Add movie to watchlist and move to planner screen*/}
+                                <View>
+                                    <Button title='Add to Watchlist' onPress={handleAddToWatchlist}/>
+                                    <Button
+                                        title="Plan Movie Night"
+                                        onPress={() => navigation.navigate('Planner', {movie: movie})}
+                                    />
+                                </View>
+                            </View>
+                        )}
+                        
+                        {/*Display saved theater list*/} 
+                        <View>
+                            <Text>My Local Theaters:</Text>
+                            {localTheaters.length === 0 ? (
+                                <Text>No local theaters added yet.</Text>
+                            ) : (
+                                //Creates text component of theater array 
+                                localTheaters.map((theater, index) => (
+                                    <Text key={index}>• {theater}</Text>
+                                )) 
+                            )}
+
+                            {/*Theater input*/}    
+                            <Text>Add a Local Theater:</Text>
+                            <TextInput
+                                placeholder="e.g., Carlton Cinema"
+                                value={theaterName}
+                                onChangeText={setTheaterName}
+                                maxLength={30}
+                            />
+                            <Button title='Add Theater' onPress={handleAddTheater}/>
+                        </View>
                     </View>
 
-                    //Empty and success movie data
-                    {!movie ? (
-                        <Text>No movie selected. Return to Home and select a movie to view details.</Text>       
-                    ) : (
-                        <View>
-                            <Text>{movie.title}</Text>
-                            <Text>Release Date: {movie.release_date || 'N/A'}</Text>
-                            <Text>Synopsis:</Text>
-                            <Text>{movie.overview || 'No synopsis available'}</Text>
-                        </View>
-                    )}
 
                 )}
             </ScrollView>
