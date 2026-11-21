@@ -3,6 +3,8 @@ import { View, Text, TextInput, Button, FlatList, Pressable, ActivityIndicator, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 
+import homeStyles from '../styling/homeStyles'; 
+
 export const HomeScreen = ({navigation}) => {
     //Local state for form and filter
     const [searchQuery, setSearchQuery] = useState('');
@@ -55,92 +57,147 @@ export const HomeScreen = ({navigation}) => {
     };
 
     return(
-        <SafeAreaView>
-            <View>
-                <Text>Discover Movies</Text>
+        <SafeAreaView style={homeStyles.container}>
+            <View style={homeStyles.content}>
+
+                <Text style={homeStyles.heading}>
+                    Discover Movies
+                </Text>
 
                 {/*Navigation options and GoBack*/}
-                <View>
-                    <Button
-                        title='Go to Watchlist'
+                <View style={homeStyles.navigationContainer}>
+                    
+                    <Pressable
+                        style={homeStyles.navigationButton}
                         onPress={() => navigation.navigate('Watchlist')}
-                    />
-                    <Button
-                        title='Go to Planner'
+                    >
+                        <Text style={homeStyles.buttonText}>
+                            Go to Watchlist
+                        </Text>
+                    </Pressable>
+
+                    <Pressable
+                        style={homeStyles.navigationButton}
                         onPress={() => navigation.navigate('Planner')}
-                    />
+                    >
+                        <Text style={homeStyles.buttonText}>
+                            Go to Planner
+                        </Text>
+                    </Pressable>
+
                     {/*Check if there's previous page to return then render*/}
                     {navigation.canGoBack() && (
-                        <Button title='Go Back' onPress={() => navigation.goBack()}/>
+                        <Pressable
+                            style={homeStyles.navigationButton} 
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Text style={homeStyles.buttonText}>
+                                Go Back
+                            </Text>
+                        </Pressable>
                     )}
                 </View>
 
                 {/*Search bar validation and reset*/}
-                <View>
+                <View style={homeStyles.searchContainer}>
+
                     <TextInput
+                        style={homeStyles.searchInput}
                         placeholder='Search by movie title...'
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         maxLength={60}
                     />
-                    <Button
-                        title='Search'
-                        onPress={() => {handleSearch}}
-                    />
+                    <Pressable
+                        style={homeStyles.searchButton}
+                        onPress={handleSearch}
+                    >
+                        <Text style={homeStyles.buttonText}>
+                            Search
+                        </Text>
+                    </Pressable>
+
                     {/*Check if there's input to reset then render*/}
                     {searchQuery.length > 0 && (
-                        <Button title='Clear Search' onPress={handleResetSearch}/>
+                        <Pressable
+                            style={homeStyles.clearButton} 
+                            onPress={handleResetSearch}
+                        >
+                            <Text style={homeStyles.clearText}>
+                                Clear Search
+                            </Text>                            
+                        </Pressable>
                     )}
+
                 </View>
 
                 {/*Category dropdown filter*/}
-                <View>
-                    <Text>Browse Category:</Text>
-                    <Picker
-                        selectedValue={category}
-                        onValueChange={(itemValue) => {
-                            setCategory(itemValue);
-                            setError('');
-                        }}
-                        
-                        //=============
-                        // API endpoint
-                        //=============
-                    >
-                        <Picker.item label ="Now Playing in Theaters" value="now_playing"/>
-                        <Picker.item label ="Upcoming Releases" value="upcoming"/>
-                        <Picker.item label ="Popular Movies" value="popular"/>    
-                    </Picker>
+                <View style={homeStyles.categoryContainer}>
+
+                    <Text style={homeStyles.categoryLabel}>
+                        Browse Category:
+                    </Text>
+                    
+                    <View style={homeStyles.pickerContainer}>
+
+                        <Picker
+                            style={homeStyles.picker}
+                            dropdownIconColor="#FFFFFF"
+                            selectedValue={category}
+                            onValueChange={(itemValue) => {
+                                setCategory(itemValue);
+                                setError('');
+                            }}
+                            
+                            //=============
+                            // API endpoint
+                            //=============
+                        >
+                            <Picker.Item label ="Now Playing in Theaters" value="now_playing"/>
+                            <Picker.Item label ="Upcoming Releases" value="upcoming"/>
+                            <Picker.Item label ="Popular Movies" value="popular"/>    
+                        </Picker>
+                    </View>
                 </View>
                 
-                {/*Conditional rendering for loading, eorror, empty, and success*/}
+                {/*Conditional rendering for loading, error, empty, and success*/}
                 {isLoading ? (
-                    <View>
-                        <ActivityIndicator size="large"/>
-                        <Text>Loading movies...</Text>
+                    <View style={homeStyles.loadingContainer}>
+                        <ActivityIndicator size="large" color="871C1C1"/>
+                        <Text style={homeStyles.messageText}>Loading movies...</Text>
                     </View>
-                ) : error !== '' ? (
+                ) : error ? (
                     <View>
-                        <Text>Error: {error}</Text>
+                        <Text style={homeStyles.errorText}>Error: {error}</Text>
                         <Button title='Dismiss error' onPress={() => setError('')}/>
                     </View>
                 ) : (
                     <FlatList
                         data={movies}
-                        keyExtractor={(item) => item.id.tostring()} 
+                        keyExtractor={(item) => item.id.toString()}
+                        keyboardShouldPersistTaps="handled" 
                         ListEmptyComponent={
-                            <Text>No movies availble. Search for a title or load a category.</Text>
+                            <Text style={homeStyles.messageText}>
+                                No movies available. Search for a title or load a category.
+                            </Text>
                         }
                         renderItem={({item}) => (
-                            <Pressable onPress={() => onMoviePressed(item)}>
-                                <View>
-                                    <Text>{item.title}</Text>
-                                    <Text>Release: {item.release_date}</Text>
-                                </View>
+                            <Pressable
+                                style={homeStyles.movieCard}
+                                onPress={() => onMoviePressed(item)}
+                            >
+                                <Text style={homeStyles.movieTitle}>
+                                    {item.title}
+                                </Text>
+
+                                <Text style={homeStyles.movieRelease}>
+                                    Release: {item.release_date}
+                                </Text>
                             </Pressable>
                         )}
                     />
                 )}
+
             </View>
         </SafeAreaView>
     );

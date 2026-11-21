@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, Button, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TextInput, Button, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import movieDetailStyles from '../styling/movieDetailStyles';
 
 export const MovieDetailScreen = ({route, navigation}) => {
     //Retrieve movie obj passed from home screen
@@ -79,73 +81,170 @@ export const MovieDetailScreen = ({route, navigation}) => {
     };
 
     return(
-        <SafeAreaView>
-            <ScrollView>
+        <SafeAreaView style={movieDetailStyles.container}>
+            <ScrollView
+                contentContainerStyle={movieDetailStyles.scrollContainer}
+                keyboardShouldPersistTaps="handled"
+            >
                 {/*Conditional rendering loading, error, empty, success states */}
                 {isLoading ? (
-                    <View>
-                        <ActivityIndicator size="large"/>
-                        <Text>Loading movie details...</Text>
+                    <View style={movieDetailStyles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#871C1C"/>
+                        <Text style={movieDetailStyles.messageText}>
+                            Loading movie details...
+                        </Text>
                     </View>
+
                 ) : (
-                    <View>
+
+                    <View style={movieDetailStyles.content}>
                         {error !=='' && (
                             <View>
-                                <Text>Error: {error}</Text>
-                                <Button title='Dismiss error' onPress={() => setError('')}/>
+                                <Text style={movieDetailStyles.errorText}>
+                                    Error: {error}
+                                </Text>
+
+                                <Button 
+                                    title='Dismiss error' 
+                                    onPress={() => setError('')}/>
                             </View>
                         )}
 
                         {/*Empty and success movie data*/}
                         {!movie ? (
-                            <Text>No movie selected. Return to Home and select a movie to view details.</Text>       
-                        ) : (
-                            <View>
-                                <Text>{movie.title}</Text>
-                                <Text>Release Date: {movie.release_date || 'N/A'}</Text>
-                                <Text>Synopsis:</Text>
-                                <Text>{movie.overview || 'No synopsis available'}</Text>
+                            <Text style={movieDetailStyles.messageText}>
+                                No movie selected. Return to Home and select a movie to view details.
+                            </Text>       
+                        
+                    ) : (
+                            
+                            <View style={movieDetailStyles.movieContainer}>
+
+                                <Text style={movieDetailStyles.movieTitle}>
+                                    {movie.title}
+                                </Text>
+
+                                <Text style={movieDetailStyles.releaseDate}>
+                                    Release Date: {movie.release_date || 'N/A'}
+                                </Text>
+
+                                <Text style={movieDetailStyles.sectionHeading}>
+                                    Synopsis:
+                                </Text>
+
+                                <Text style={movieDetailStyles.synopsis}>
+                                    {movie.overview || 'No synopsis available'}
+                                </Text>
                             
                                 {/*Add movie to watchlist and move to planner screen*/}
-                                <View>
-                                    <Button title='Add to Watchlist' onPress={handleAddToWatchlist}/>
-                                    <Button
-                                        title="Plan Movie Night"
+                                <View style={movieDetailStyles.buttonContainer}>
+
+                                    <Pressable
+                                        style={movieDetailStyles.button}
+                                        onPress={handleAddToWatchlist}
+                                    >
+                                        <Text style={movieDetailStyles.buttonText}>
+                                            Add to Watchlist
+                                        </Text>
+                                    </Pressable>
+
+                                    <Pressable
+                                        style={movieDetailStyles.button}
                                         onPress={() => navigation.navigate('Planner', {movie: movie})}
-                                    />
+                                    >
+                                        <Text style={movieDetailStyles.buttonText}>
+                                            Movie Planner
+                                        </Text>
+
+                                    </Pressable>
+                                    
                                 </View>
                             </View>
                         )}
                         
                         {/*Display saved theater list*/} 
-                        <View>
-                            <Text>My Local Theaters:</Text>
+                        <View style={movieDetailStyles.theaterContainer}>
+
+                            <Text style={movieDetailStyles.sectionHeading}>
+                                My Local Theaters:
+                            </Text>
+
                             {localTheaters.length === 0 ? (
-                                <Text>No local theaters added yet.</Text>
+
+                                <Text style={movieDetailStyles.theaterText}>
+                                    No local theaters added yet.
+                                </Text>
+
                             ) : (
+
                                 //Creates text component of theater array 
                                 localTheaters.map((theater, index) => (
-                                    <Text key={index}>• {theater}</Text>
+                                    <Text
+                                        key={index}
+                                        style={movieDetailStyles.theaterText}
+                                    >
+                                        • {theater}
+                                    </Text>
                                 )) 
                             )}
 
                             {/*Theater input*/}    
-                            <Text>Add a Local Theater:</Text>
+                            <Text style={movieDetailStyles.sectionHeading}>
+                                Add a Local Theater:
+                            </Text>
+
                             <TextInput
+                                style={movieDetailStyles.theaterInput}
                                 placeholder="e.g., Carlton Cinema"
+                                placeholderTextColor="#999999"
                                 value={theaterName}
                                 onChangeText={setTheaterName}
                                 maxLength={30}
                             />
-                            <Button title='Add Theater' onPress={handleAddTheater}/>
+
+                            <Pressable
+                                style={movieDetailStyles.button}
+                                onPress={handleAddTheater}
+                            >
+                                <Text style={movieDetailStyles.buttonText}>
+                                    Add Theater
+                                </Text>
+                            </Pressable>
+
                         </View>
 
                         {/*Page navigation buttons*/}        
-                        <View>
-                            <Button title='Go to Home' onPress={() => navigation.navigate('Home')}/>
-                            <Button title='Go to Watchlist' onPress={() => navigation.navigate('Watchlist')}/>
-                            <Button title='Go to Planner' onPress={() => navigation.navigate('Planner')}/>
-                            <Button title='Go back' onPress={() => navigation.goBack()}/>
+                        <View style={movieDetailStyles.navigationContainer}>
+                            
+                            <Pressable
+                                style={movieDetailStyles.navigationButton}
+                                onPress={() => navigation.navigate('Watchlist')}
+                            >
+                                <Text style={movieDetailStyles.buttonText}>
+                                    Go to Watchlist
+                                </Text>
+                            </Pressable>
+
+                            <Pressable
+                                style={movieDetailStyles.navigationButton}
+                                onPress={() => navigation.navigate('Planner')}
+                            >
+                                <Text style={movieDetailStyles.buttonText}>
+                                    Go to Planner
+                                </Text>
+                            </Pressable>
+
+                            {navigation.canGoBack() && (
+                                <Pressable
+                                    style={movieDetailStyles.navigationButton}
+                                    onPress={() => navigation.goBack()}
+                                >
+                                    <Text style={movieDetailStyles.buttonText}>
+                                        Go Back
+                                    </Text>
+                                </Pressable>
+                            )}
+                            
                         </View>
                     </View>
                 )}
