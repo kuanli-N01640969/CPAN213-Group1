@@ -131,12 +131,38 @@ export const WatchlistScreen = ({route, navigation}) => {
                                 </Pressable>
                             )}
                         />
-                    </View>
-                    
-                    
-                    
+                        
+                        {/*Display scheduled movie nights*/}
+                        <View>
+                            <Text>Scheduled Movie Nights ({plannedEvents.length})</Text>
+                            
+                            {plannedEvents.length === 0 ? (
+                                <Text>No movie nights scheduled yet.</Text>
+                            ) : (
+                                //Creates individual UI for each movie plan
+                                plannedEvents.map((plan) => (
+                                    //Display movie plan info 
+                                    <View key={plan.id}>
+                                        <Text>{plan.eventTitle}</Text>
+                                        <Text>
+                                            {plan.date} | {plan.venue} | {plan.attendees} attendee(s)
+                                        </Text>
+                                        {plan.notes !== '' && <Text>Notes: {plan.notes}</Text>}
+                                    </View>
+                                ))
+                            )} 
+                        </View>
+                    </View>   
                 )}
+
+                {/*Page navigation buttons*/}  
+                <View>
+                    <Button title='Go to Home' onPress={() => navigation.navigate('Home')}/>
+                    <Button title='Go to Movie Detail' onPress={() => navigation.navigate('MovieDetail')}/>
+                    <Button title='Go to Planner' onPress={() => navigation.navigate('Planner')}/>
+                    <Button title='Go back' onPress={() => navigation.goBack()}/>
+                </View>    
             </View>
         </SafeAreaView>
-    )
-}
+    );
+};
