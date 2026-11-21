@@ -19,14 +19,14 @@ export const HomeScreen = ({navigation}) => {
     //Search input validation 
     const handleSearch = async() => {
         try{
-            const trimmedQuery = searchQuery.trim(); //remove empty spaces
+            const trimmedQuery = searchQuery.trim(); //remove white spaces
             //Blank entry
             if (trimmedQuery === ''){
                 Alert.alert('Invalid input', 'Please enter a movie title.')
                 return;
             }
 
-            //Data format
+            //Data format validation
             const validTextPattern = /[a-zA-Z0-9]/;
             if (!validTextPattern.test(trimmedQuery)){
                 Alert.alert('Invalid data format.', 'Please enter letters or numbers.')
