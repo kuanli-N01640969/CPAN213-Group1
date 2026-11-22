@@ -71,15 +71,17 @@ export const MovieDetailScreen = ({route, navigation}) => {
                 return;
             }
 
-            Alert.alert('Added to Watchlist', `"${movie.title}" has been added to your handleAddToWatchlist.`,
-            [
-                {
-                    text: 'View Watchlist',
-                    onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}), //move to watchlist screen
-                },
-                {text: 'Back to movie detail'}, //remain in movie detail screen 
-            ]
-            )
+           Alert.alert(
+                'Added to Watchlist',
+                `"${movie.title}" has been added to your handleAddToWatchlist.`,
+                [
+                    {
+                        text: 'View Watchlist',
+                        onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}),
+                    },
+                    {text: 'Back to movie detail'},
+                ]
+            );
         } catch(error){
             Alert.alert('Error', 'Could not add movie to your watchlist');
         } finally{
@@ -178,10 +180,16 @@ export const MovieDetailScreen = ({route, navigation}) => {
                                     Release Date: {movie.release_date || 'N/A'}
                                 </Text>
                                 {/* Abeer added this here - Display runtime, theatrical status, and genres from /movie/{id} */}
-                                <Text>Runtime: {movie.runtime ? `${movie.runtime} mins` : 'N/A'}</Text>
-                                <Text>Status: {movie.status || 'N/A'}</Text>
+                                <Text style={movieDetailStyles.infoText}>
+                                    Runtime: {movie.runtime ? `${movie.runtime} mins` : 'N/A'}
+                                    </Text>
+                                <Text style={movieDetailStyles.infoText}>
+                                    Status: {movie.status || 'N/A'}
+                                    </Text>
                                 {movie.genres && movie.genres.length > 0 && (
-                                    <Text>Genres: {movie.genres.join(', ')}</Text>
+                                    <Text style={movieDetailStyles.infoText}>
+                                        Genres: {movie.genres.join(', ')}
+                                    </Text>
                                 )}
                                 {/* ended here */}
 
@@ -207,13 +215,16 @@ export const MovieDetailScreen = ({route, navigation}) => {
 
                                     <Pressable
                                         style={movieDetailStyles.button}
-                                        onPress={() => navigation.navigate('Planner', {movie: movie})}
+                                        onPress={() => navigation.navigate('Planner', { movie: movie })}
                                     >
                                         <Text style={movieDetailStyles.buttonText}>
-                                            Movie Planner
+                                            Add to Planner
                                         </Text>
-
                                     </Pressable>
+
+                                    
+
+                                   
                                     
                                 </View>
                             </View>

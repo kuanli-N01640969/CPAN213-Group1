@@ -122,6 +122,12 @@ const movieDetailStyles = StyleSheet.create({
         marginTop: 40,
     },
 
+    infoText: {
+        color: '#a5a5a5',
+        fontsize: 12,
+        marginBottom: 5,
+    },
+
 });
 
 export default movieDetailStyles;

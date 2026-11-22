@@ -47,8 +47,8 @@ const homeStyles = StyleSheet.create({
     },
 
     searchInput: {
-        backgroundColor: '#292929',
-        color: '#FFFFFF',
+        backgroundColor: '#ffffff',
+        color: '#000000',
         padding: 15,
         borderRadius: 10,
         fontSize: 16,

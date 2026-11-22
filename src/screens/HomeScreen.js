@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, Button, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 // Abeer added this here - Import TMDB API service functions for category feeds and title search
-import { useEffect, useCallback, Image } from 'react-native';
+import { Image } from 'react-native';
 import { fetchMoviesByCategory, searchMovies } from '../services/tmdbAPI';
 // ended here
 
