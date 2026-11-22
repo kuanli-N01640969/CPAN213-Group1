@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, Button, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, ScrollView, TextInput, Button, Pressable, ActivityIndicator, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // Abeer added this here - Import fetchMovieDetails to load runtime, genres, and theatrical status
 import { fetchMovieDetails } from '../services/tmdbAPI';
 // ended here
+
+import movieDetailStyles from '../styling/movieDetailStyles';
 
 export const MovieDetailScreen = ({route, navigation}) => {
     //Retrieve movie obj passed from home screen
@@ -69,15 +71,17 @@ export const MovieDetailScreen = ({route, navigation}) => {
                 return;
             }
 
-            Alert.alert('Added to Watchlist', `"${movie.title}" has been added to your handleAddToWatchlist.`,
-            [
-                {
-                    text: 'View Watchlist',
-                    onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}), //move to watchlist screen
-                },
-                {text: 'Back to movie detail'}, //remain in movie detail screen 
-            ]
-            )
+           Alert.alert(
+                'Added to Watchlist',
+                `"${movie.title}" has been added to your handleAddToWatchlist.`,
+                [
+                    {
+                        text: 'View Watchlist',
+                        onPress: () => navigation.navigate('Watchlist', {addedMovie: movie}),
+                    },
+                    {text: 'Back to movie detail'},
+                ]
+            );
         } catch(error){
             Alert.alert('Error', 'Could not add movie to your watchlist');
         } finally{
@@ -121,28 +125,44 @@ export const MovieDetailScreen = ({route, navigation}) => {
     };
 
     return(
-        <SafeAreaView>
-            <ScrollView>
+        <SafeAreaView style={movieDetailStyles.container}>
+            <ScrollView
+                contentContainerStyle={movieDetailStyles.scrollContainer}
+                keyboardShouldPersistTaps="handled"
+            >
                 {/*Conditional rendering loading, error, empty, success states */}
                 {isLoading ? (
-                    <View>
-                        <ActivityIndicator size="large"/>
-                        <Text>Loading movie details...</Text>
+                    <View style={movieDetailStyles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#871C1C"/>
+                        <Text style={movieDetailStyles.messageText}>
+                            Loading movie details...
+                        </Text>
                     </View>
+
                 ) : (
-                    <View>
+
+                    <View style={movieDetailStyles.content}>
                         {error !=='' && (
                             <View>
-                                <Text>Error: {error}</Text>
-                                <Button title='Dismiss error' onPress={() => setError('')}/>
+                                <Text style={movieDetailStyles.errorText}>
+                                    Error: {error}
+                                </Text>
+
+                                <Button 
+                                    title='Dismiss error' 
+                                    onPress={() => setError('')}/>
                             </View>
                         )}
 
                         {/*Empty and success movie data*/}
                         {!movie ? (
-                            <Text>No movie selected. Return to Home and select a movie to view details.</Text>
-                        ) : (
-                            <View>
+                            <Text style={movieDetailStyles.messageText}>
+                                No movie selected. Return to Home and select a movie to view details.
+                            </Text>       
+                        
+                    ) : (
+                            
+                            <View style={movieDetailStyles.movieContainer}>
                                 {/* Abeer added this here - Render movie poster image from normalized TMDB posterUrl */}
                                 {movie.posterUrl ? (
                                     <Image
@@ -151,58 +171,148 @@ export const MovieDetailScreen = ({route, navigation}) => {
                                     />
                                 ) : null}
                                 {/* ended here */}
-                                <Text>{movie.title}</Text>
-                                <Text>Release Date: {movie.release_date || 'N/A'}</Text>
+
+                                <Text style={movieDetailStyles.movieTitle}>
+                                    {movie.title}
+                                </Text>
+
+                                <Text style={movieDetailStyles.releaseDate}>
+                                    Release Date: {movie.release_date || 'N/A'}
+                                </Text>
                                 {/* Abeer added this here - Display runtime, theatrical status, and genres from /movie/{id} */}
-                                <Text>Runtime: {movie.runtime ? `${movie.runtime} mins` : 'N/A'}</Text>
-                                <Text>Status: {movie.status || 'N/A'}</Text>
+                                <Text style={movieDetailStyles.infoText}>
+                                    Runtime: {movie.runtime ? `${movie.runtime} mins` : 'N/A'}
+                                    </Text>
+                                <Text style={movieDetailStyles.infoText}>
+                                    Status: {movie.status || 'N/A'}
+                                    </Text>
                                 {movie.genres && movie.genres.length > 0 && (
-                                    <Text>Genres: {movie.genres.join(', ')}</Text>
+                                    <Text style={movieDetailStyles.infoText}>
+                                        Genres: {movie.genres.join(', ')}
+                                    </Text>
                                 )}
                                 {/* ended here */}
-                                <Text>Synopsis:</Text>
-                                <Text>{movie.overview || 'No synopsis available'}</Text>
+
+                                <Text style={movieDetailStyles.sectionHeading}>
+                                    Synopsis:
+                                </Text>
+
+                                <Text style={movieDetailStyles.synopsis}>
+                                    {movie.overview || 'No synopsis available'}
+                                </Text>
                             
                                 {/*Add movie to watchlist and move to planner screen*/}
-                                <View>
-                                    <Button title='Add to Watchlist' onPress={handleAddToWatchlist}/>
-                                    <Button
-                                        title="Plan Movie Night"
-                                        onPress={() => navigation.navigate('Planner', {movie: movie})}
-                                    />
+                                <View style={movieDetailStyles.buttonContainer}>
+
+                                    <Pressable
+                                        style={movieDetailStyles.button}
+                                        onPress={handleAddToWatchlist}
+                                    >
+                                        <Text style={movieDetailStyles.buttonText}>
+                                            Add to Watchlist
+                                        </Text>
+                                    </Pressable>
+
+                                    <Pressable
+                                        style={movieDetailStyles.button}
+                                        onPress={() => navigation.navigate('Planner', { movie: movie })}
+                                    >
+                                        <Text style={movieDetailStyles.buttonText}>
+                                            Add to Planner
+                                        </Text>
+                                    </Pressable>
+
+                                    
+
+                                   
+                                    
                                 </View>
                             </View>
                         )}
                         
-                        {/*Display saved theater list*/}
-                        <View>
-                            <Text>My Local Theaters:</Text>
+                        {/*Display saved theater list*/} 
+                        <View style={movieDetailStyles.theaterContainer}>
+
+                            <Text style={movieDetailStyles.sectionHeading}>
+                                My Local Theaters:
+                            </Text>
+
                             {localTheaters.length === 0 ? (
-                                <Text>No local theaters added yet.</Text>
+
+                                <Text style={movieDetailStyles.theaterText}>
+                                    No local theaters added yet.
+                                </Text>
+
                             ) : (
-                                //Creates text component of theater array
+
+                                //Creates text component of theater array 
                                 localTheaters.map((theater, index) => (
-                                    <Text key={index}>• {theater}</Text>
+                                    <Text
+                                        key={index}
+                                        style={movieDetailStyles.theaterText}
+                                    >
+                                        • {theater}
+                                    </Text>
                                 )) 
                             )}
 
-                            {/*Theater input*/}
-                            <Text>Add a Local Theater:</Text>
+                            {/*Theater input*/}    
+                            <Text style={movieDetailStyles.sectionHeading}>
+                                Add a Local Theater:
+                            </Text>
+
                             <TextInput
+                                style={movieDetailStyles.theaterInput}
                                 placeholder="e.g., Carlton Cinema"
+                                placeholderTextColor="#999999"
                                 value={theaterName}
                                 onChangeText={setTheaterName}
                                 maxLength={30}
                             />
-                            <Button title='Add Theater' onPress={handleAddTheater}/>
+
+                            <Pressable
+                                style={movieDetailStyles.button}
+                                onPress={handleAddTheater}
+                            >
+                                <Text style={movieDetailStyles.buttonText}>
+                                    Add Theater
+                                </Text>
+                            </Pressable>
+
                         </View>
 
-                        {/*Page navigation buttons*/}
-                        <View>
-                            <Button title='Go to Home' onPress={() => navigation.navigate('Home')}/>
-                            <Button title='Go to Watchlist' onPress={() => navigation.navigate('Watchlist')}/>
-                            <Button title='Go to Planner' onPress={() => navigation.navigate('Planner')}/>
-                            <Button title='Go back' onPress={() => navigation.goBack()}/>
+                        {/*Page navigation buttons*/}        
+                        <View style={movieDetailStyles.navigationContainer}>
+                            
+                            <Pressable
+                                style={movieDetailStyles.navigationButton}
+                                onPress={() => navigation.navigate('Watchlist')}
+                            >
+                                <Text style={movieDetailStyles.buttonText}>
+                                    Go to Watchlist
+                                </Text>
+                            </Pressable>
+
+                            <Pressable
+                                style={movieDetailStyles.navigationButton}
+                                onPress={() => navigation.navigate('Planner')}
+                            >
+                                <Text style={movieDetailStyles.buttonText}>
+                                    Go to Planner
+                                </Text>
+                            </Pressable>
+
+                            {navigation.canGoBack() && (
+                                <Pressable
+                                    style={movieDetailStyles.navigationButton}
+                                    onPress={() => navigation.goBack()}
+                                >
+                                    <Text style={movieDetailStyles.buttonText}>
+                                        Go Back
+                                    </Text>
+                                </Pressable>
+                            )}
+                            
                         </View>
                     </View>
                 )}

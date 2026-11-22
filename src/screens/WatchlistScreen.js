@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Pressable, Button, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, ScrollView, Pressable, Button, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import watchlistStyles from '../styling/watchlistStyles';
 
 //========================================
 // M2 TODO: Data load from firestore/redux 
@@ -11,7 +13,7 @@ export const WatchlistScreen = ({route, navigation}) => {
     const [plannedEvents, setPlannedEvents] = useState([]);
     //Loading and error states
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = ('');
+    const [error, setError] = useState('');
 
     //Retrieve added movie from detail screen
     useEffect(() =>{
@@ -82,72 +84,143 @@ export const WatchlistScreen = ({route, navigation}) => {
     };
 
     return(
-        <SafeAreaView>
-            <View>
-                <Text>Saved Watchlist ({watchlist.length})</Text>
+        <SafeAreaView style={watchlistStyles.container}>
+            <ScrollView
+                contentContainerStyle={{ padding: 20 }}
+                keyboardShouldPersistTaps="handled"
+            >
+
+                <Text style={watchlistStyles.heading}>
+                    Saved Watchlist ({watchlist.length})
+                </Text>
 
                 {/*Conditional rendering loading, error, empty, success states */}
                 {isLoading ? (
-                    <View>
-                        <ActivityIndicator size="large"/>
-                        <Text>Updating watchlist...</Text>
+                    <View style={watchlistStyles.loadingContainer}>
+                        <ActivityIndicator
+                            size="large"
+                            color="#B71C1C"
+                        />
+                        <Text style={watchlistStyles.messageText}>
+                            Updating watchlist...
+                        </Text>
                     </View>
+               
                 ) : (
+
                     <View>
+                        
+
                         {error !== '' && (
                             <View>
-                                <Text>Error: {error}</Text>
-                                <Button title='Dismiss error' onPress={()=> setError('')}/>
+                                <Text style={watchlistStyles.errorText}>
+                                    Error: {error}
+                                </Text>
+
+                                <Button
+                                    title="Dismiss Error"
+                                    onPress={() => setError('')}
+                                />
                             </View>
-                        )}
+                    )}
 
                         {/*Display User Watchlist*/}
-                        <FlatList
+                        
+                         <FlatList
+                            style={watchlistStyles.movieList}
                             data={watchlist}
                             keyExtractor={(item) => item.id.toString()} //keeps track array and convert id to string
+                            scrollEnabled={false}
                             ListEmptyComponent={
-                                <Text>Your watchlist is empty, browse home to add movies.</Text>
+                                <Text style={watchlistStyles.messageText}>
+                                    Your watchlist is empty.
+                                    Browse Home to add movies.
+                                </Text>
                             } 
                             //Extracts current movie from flatlist
                             renderItem={({item}) => (
-                                <Pressable onPress={()=>navigation.navigate('MovieDetail', {movie: item})}> {/*Passing selected movie from detail screen*/}
-                                    <View>
+                                <Pressable
+                                    style={watchlistStyles.movieCard}
+                                    onPress={()=>navigation.navigate('MovieDetail', {movie: item})}> {/*Passing selected movie from detail screen*/}
+                                       
                                         {/*Movie info*/}
-                                        <Text>{item.title}</Text>
-                                        <Text>Release: {item.release_date || 'N/A'}</Text>
+                                        <Text style={watchlistStyles.movieTitle}>
+                                            {item.title}
+                                        </Text>
+                                        <Text style={watchlistStyles.releaseDate}>
+                                            Release: {item.release_date || 'N/A'}
+                                        </Text>
                                         
-                                        {/*Send selected movie to Planner screen*/}
-                                        <Button
-                                            title='Plan Movie Night'
-                                            onPress={() => navigation.navigate('Planner', {movie: item})}
-                                        />
+                                        <View style={watchlistStyles.buttonContainer}>
 
-                                        {/*Remove movie*/}
-                                        <Button
-                                            title='Remove'
-                                            onPress={() => confirmRemove(item.id, item.title)}
-                                        />
-                                    </View>
-                                </Pressable>
+                                            {/*Send selected movie to Planner screen*/}
+                                            <Pressable
+                                                style={watchlistStyles.button}
+                                                onPress={() => navigation.navigate('Planner', {movie: item})}
+                                            >
+                                                <Text style={watchlistStyles.buttonText}>
+                                                    Plan Movie Night
+                                                </Text>
+                                            </Pressable>
+
+                                            {/*Remove movie*/}
+
+                                            <Pressable
+                                                style={watchlistStyles.removeButton}
+                                                onPress={() => confirmRemove(
+                                                    item.id,
+                                                    item.title
+                                                )}
+                                            >
+
+                                                <Text style={watchlistStyles.buttonText}>
+                                                    Remove
+                                                </Text>
+                                            </Pressable>
+
+                                        </View>
+                                    
+                                    </Pressable>
                             )}
                         />
-                        
+                           
                         {/*Display scheduled movie nights*/}
-                        <View>
-                            <Text>Scheduled Movie Nights ({plannedEvents.length})</Text>
-                            
+                        <View style={watchlistStyles.plannerContainer}>
+
+                            <Text style={watchlistStyles.sectionHeading}>
+                                Scheduled Movie Nights ({plannedEvents.length})
+                            </Text>
+
                             {plannedEvents.length === 0 ? (
-                                <Text>No movie nights scheduled yet.</Text>
+
+                                <Text style={watchlistStyles.messageText}>
+                                    No movie nights scheduled yet.
+                                </Text>
+
                             ) : (
+
                                 //Creates individual UI for each movie plan
                                 plannedEvents.map((plan) => (
                                     //Display movie plan info 
-                                    <View key={plan.id}>
-                                        <Text>{plan.eventTitle}</Text>
-                                        <Text>
+                                     <View
+                                        key={plan.id}
+                                        style={watchlistStyles.planCard}
+                                    >
+
+                                        <Text style={watchlistStyles.planTitle}>
+                                            {plan.eventTitle}
+                                        </Text>
+
+                                        <Text style={watchlistStyles.planText}>
                                             {plan.date} | {plan.venue} | {plan.attendees} attendee(s)
                                         </Text>
-                                        {plan.notes !== '' && <Text>Notes: {plan.notes}</Text>}
+
+                                        {Boolean(plan.notes) && (
+                                            <Text style={watchlistStyles.planText}>
+                                                Notes: {plan.notes}
+                                            </Text>
+                                        )}
+
                                     </View>
                                 ))
                             )} 
@@ -155,14 +228,49 @@ export const WatchlistScreen = ({route, navigation}) => {
                     </View>   
                 )}
 
-                {/*Page navigation buttons*/}  
-                <View>
-                    <Button title='Go to Home' onPress={() => navigation.navigate('Home')}/>
-                    <Button title='Go to Movie Detail' onPress={() => navigation.navigate('MovieDetail')}/>
-                    <Button title='Go to Planner' onPress={() => navigation.navigate('Planner')}/>
-                    <Button title='Go back' onPress={() => navigation.goBack()}/>
-                </View>    
-            </View>
+                {/*Page navigation buttons*/}
+                <View style={watchlistStyles.navigationContainer}>
+
+                    <Pressable
+                        style={watchlistStyles.navigationButton}
+                        onPress={() => navigation.navigate('Home')}
+                    >
+                        <Text style={watchlistStyles.buttonText}>
+                            Go to Home
+                        </Text>
+                    </Pressable>
+
+                    <Pressable
+                        style={watchlistStyles.navigationButton}
+                        onPress={() => navigation.navigate('MovieDetail')}
+                    >
+                        <Text style={watchlistStyles.buttonText}>
+                            Go to Movie Detail
+                        </Text>
+                    </Pressable>
+
+                    <Pressable
+                        style={watchlistStyles.navigationButton}
+                        onPress={() => navigation.navigate('Planner')}
+                    >
+                        <Text style={watchlistStyles.buttonText}>
+                            Go to Planner
+                        </Text>
+                    </Pressable>
+
+                     {navigation.canGoBack() && (
+                        <Pressable
+                            style={watchlistStyles.navigationButton}
+                            onPress={() => navigation.goBack()}
+                    >
+                        <Text style={watchlistStyles.buttonText}>
+                            Go Back
+                        </Text>
+                    </Pressable>
+                     )}
+                </View>
+
+            </ScrollView>
         </SafeAreaView>
-    );
+    )
 };

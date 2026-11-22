@@ -14,7 +14,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   //Global header configuration
   const sharedHeaderOptions = {
-    headerStyle: { backgroundColor: '#1e293b'},
+    headerStyle: { backgroundColor: '#B71C1C'},
     headerTintColor: '#ffffff',
     headerTitleAlign: 'center',
     headerTitleStyle: { fontWeight: 'bold'},
@@ -44,7 +44,7 @@ export default function App() {
               <Stack.Screen
                 name="Planner"
                 component={PlannerScreen}
-                options={{title: 'Marathon Planner'}}
+                options={{title: 'Movie Planner'}}
               />
             </Stack.Group>
           </Stack.Navigator>
